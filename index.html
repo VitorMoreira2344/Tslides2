@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toque de Amor | App de Gestão de Pets</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800;900&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Cores da Marca - Amarelo/Âmbar */
+            --yellow-light: #FFD23F;
+            --yellow: #FFC91E;
+            --amber: #F2A900;
+            
+            /* Cores de Apoio */
+            --green: #2FBF71;
+            --blue: #5AA9E6;
+            --coral: #FF7B5E;
+            --peach: #FF9E80;
+            --coral-red: #FF6B5E;
+            
+            /* Tema Claro */
+            --bg-cream: #FFFDF6;
+            --bg-cream-dark: #FFF6E6;
+            --text-primary: #1c1814;
+            --text-secondary: #8a7f6d;
+            
+            /* Tema Escuro */
+            --bg-dark: #15120b;
+            --bg-dark-light: #1c1710;
+            --text-light: #f4eee0;
+            --text-light-secondary: #b3a892;
+            
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 253, 246, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --glass-blur: 20px;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: var(--bg-cream);
+        }
+
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+
+        /* === SLIDES === */
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 60px 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+            z-index: 0;
+            overflow: hidden;
+            background: var(--bg-cream);
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* === SLIDE ESCURO === */
+        .slide.dark {
+            background: var(--bg-dark);
+        }
+
+        /* === NÚMERO DO SLIDE === */
+        .slide-number {
+            position: absolute;
+            top: 35px;
+            right: 55px;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: rgba(28, 24, 20, 0.05);
+            font-family: 'Bricolage Grotesque', sans-serif;
+            letter-spacing: 4px;
+            z-index: 10;
+            user-select: none;
+        }
+        .slide.dark .slide-number {
+            color: rgba(244, 238, 224, 0.05);
+        }
+        .slide-number .current {
+            color: var(--amber);
+            font-size: 2.8rem;
+            font-weight: 900;
+        }
+        .slide-number .total {
+            color: rgba(28, 24, 20, 0.12);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .slide.dark .slide-number .total {
+            color: rgba(244, 238, 224, 0.1);
+        }
+        .slide-number .separator {
+            color: rgba(28, 24, 20, 0.08);
+            font-weight: 300;
+            margin: 0 6px;
+        }
+        .slide.dark .slide-number .separator {
+            color: rgba(244, 238, 224, 0.06);
+        }
+
+        /* === CAPA === */
+        .slide.cover {
+            background: linear-gradient(135deg, var(--bg-cream) 0%, var(--bg-cream-dark) 100%);
+            text-align: center;
+            padding: 60px;
+        }
+        .slide.cover .cover-icon {
+            font-size: 5rem;
+            color: var(--amber);
+            margin-bottom: 15px;
+            display: block;
+        }
+        .slide.cover h1 {
+            font-size: 5.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .slide.cover h1 .yellow { color: var(--amber); }
+        .slide.cover .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+        .slide.cover .cover-line {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--amber), var(--yellow-light));
+            margin: 20px auto 25px;
+            border-radius: 2px;
+        }
+        .slide.cover .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* === GLASSMORPHISM CARD === */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        /* === SLIDE DE SEÇÃO === */
+        .slide.section {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--yellow) 100%);
+            text-align: center;
+            border: none;
+            padding: 60px;
+        }
+        .slide.section .icon { font-size: 4rem; color: var(--text-primary); margin-bottom: 20px; display: block; }
+        .slide.section h1 { font-size: 3.5rem; font-weight: 900; color: var(--text-primary); }
+        .slide.section p { font-size: 1.3rem; color: var(--text-primary); font-weight: 600; opacity: 0.8; }
+
+        /* === SLIDE DE CONTEÚDO === */
+        .slide.content {
+            background: var(--bg-cream);
+            text-align: left;
+            padding: 80px 80px 40px;
+        }
+        .slide.content h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--amber);
+            padding-left: 20px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        .slide.content h2 i { color: var(--amber); margin-right: 12px; }
+        .slide.content p { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7; max-width: 900px; margin-bottom: 15px; }
+        .slide.content ul { list-style: none; padding: 0; max-width: 900px; }
+        .slide.content ul li {
+            padding: 10px 0 10px 35px;
+            position: relative;
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+        .slide.content ul li:last-child { border-bottom: none; }
+        .slide.content ul li::before {
+            content: "\f0da";
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 8px;
+            color: var(--amber);
+        }
+        .slide.content .highlight {
+            background: rgba(242, 169, 0, 0.08);
+            border-left: 4px solid var(--amber);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 15px 0;
+            max-width: 900px;
+        }
+        .slide.content .highlight i { color: var(--amber); margin-right: 8px; }
+
+        /* === SLIDE COM CONTEÚDO + IMAGEM === */
+        .slide.content-with-image {
+            background: var(--bg-cream);
+            text-align: left;
+            padding: 60px 80px 40px;
+            flex-direction: row;
+            gap: 50px;
+            align-items: center;
+        }
+        .slide.content-with-image .text-content {
+            flex: 1;
+            max-width: 55%;
+        }
+        .slide.content-with-image .text-content h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--amber);
+            padding-left: 20px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        .slide.content-with-image .text-content h2 i { color: var(--amber); margin-right: 12px; }
+        .slide.content-with-image .text-content p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        .slide.content-with-image .text-content .highlight {
+            background: rgba(242, 169, 0, 0.08);
+            border-left: 4px solid var(--blue);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+        .slide.content-with-image .text-content .highlight i { color: var(--blue); margin-right: 8px; }
+        .slide.content-with-image .image-content {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 35%;
+        }
+        .slide.content-with-image .image-content img {
+            height: 70vh;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* === CARDS GLASSMORPHISM === */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 900px; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; max-width: 900px; width: 100%; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 900px; width: 100%; }
+
+        .card-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--glass-shadow);
+        }
+        .card-glass:hover {
+            transform: translateY(-8px);
+            border-color: var(--amber);
+            box-shadow: 0 20px 40px rgba(242, 169, 0, 0.12);
+        }
+        .card-glass .icon { font-size: 2.5rem; color: var(--amber); margin-bottom: 15px; display: block; }
+        .card-glass .icon.green { color: var(--green); }
+        .card-glass .icon.blue { color: var(--blue); }
+        .card-glass .icon.coral { color: var(--coral); }
+        .card-glass .icon.peach { color: var(--peach); }
+        .card-glass h4 { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); font-family: 'Bricolage Grotesque', sans-serif; }
+        .card-glass p { font-size: 0.95rem; color: var(--text-secondary); }
+
+        /* Status Badges */
+        .badge-green { background: var(--green); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-coral { background: var(--coral); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-blue { background: var(--blue); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+
+        /* === CTA BUTTON === */
+        .cta-btn {
+            display: inline-block;
+            background: var(--amber);
+            color: var(--text-primary);
+            padding: 14px 32px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        .cta-btn:hover {
+            background: var(--yellow);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(242, 169, 0, 0.25);
+        }
+
+        /* === NAVEGAÇÃO === */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 10px 18px;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+        .btn {
+            background: transparent;
+            border: 1px solid rgba(28, 24, 20, 0.08);
+            color: var(--text-primary);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: var(--amber);
+            border-color: var(--amber);
+            transform: scale(1.05);
+        }
+        .btn i { font-size: 0.9rem; }
+
+        .btn-progress {
+            background: transparent;
+            border: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            cursor: default;
+            width: auto;
+            padding: 0 10px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        .btn-progress strong { color: var(--amber); }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--amber), var(--yellow-light));
+            width: 0%;
+            transition: width 0.4s ease;
+            z-index: 101;
+        }
+
+        .dots {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(28, 24, 20, 0.12);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dot.active {
+            width: 22px;
+            border-radius: 10px;
+            background: var(--amber);
+        }
+
+        /* === SLIDE FINAL - EQUIPE === */
+        .slide.team {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-light) 100%);
+            text-align: center;
+            padding: 60px;
+        }
+        .slide.team h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        .slide.team .subtitle-team {
+            font-size: 1.2rem;
+            color: var(--text-light-secondary);
+            margin-bottom: 40px;
+        }
+        .slide.team .team-grid {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slide.team .team-member {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px 30px;
+            transition: all 0.3s ease;
+        }
+        .slide.team .team-member:hover {
+            border-color: var(--amber);
+            transform: translateY(-4px);
+        }
+        .slide.team .team-member i {
+            color: var(--amber);
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .slide.team .team-member .name {
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .slide.team .team-line {
+            width: 60px;
+            height: 2px;
+            background: var(--amber);
+            margin: 30px auto;
+            border-radius: 2px;
+        }
+        .slide.team .footer-team {
+            color: var(--text-light-secondary);
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-top: 20px;
+        }
+
+        /* === RESPONSIVO === */
+        @media (max-width: 768px) {
+            .slide { padding: 60px 25px 40px; }
+            .slide.cover h1 { font-size: 3.2rem; }
+            .slide.section h1 { font-size: 2.2rem; }
+            .slide.section { padding: 40px 20px; }
+            .slide.content { padding: 60px 25px 40px; }
+            .slide.content h2 { font-size: 1.8rem; }
+            .slide.content-with-image { flex-direction: column; padding: 60px 25px 40px; gap: 30px; }
+            .slide.content-with-image .text-content { max-width: 100%; }
+            .slide.content-with-image .image-content { max-width: 60%; }
+            .slide.content-with-image .image-content img { height: 40vh; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .slide-number { top: 20px; right: 25px; }
+            .slide-number .current { font-size: 2.2rem; }
+            .slide-number .total { font-size: 1.6rem; }
+            .controls { bottom: 15px; right: 15px; padding: 6px 12px; }
+            .btn { width: 36px; height: 36px; font-size: 0.8rem; }
+            .btn-progress { font-size: 0.7rem; padding: 0 6px; }
+            .dots { bottom: 20px; gap: 8px; }
+            .slide.team h1 { font-size: 2.5rem; }
+            .slide.team .team-grid { gap: 15px; }
+            .slide.team .team-member { padding: 12px 18px; }
+            .slide.team .team-member .name { font-size: 0.85rem; }
+        }
+
+        @media print {
+            .controls, .progress-bar, .dots, .slide-number { display: none; }
+            .slide { position: relative; opacity: 1; page-break-after: always; height: auto; min-height: 100vh; background: white !important; color: black !important; }
+            .slide.dark { background: white !important; }
+            .slide.dark h1, .slide.dark h2, .slide.dark p { color: black !important; }
+            .slide.section { background: var(--amber) !important; color: black !important; }
+            .slide.section h1, .slide.section p { color: black !important; }
+            .card-glass { border: 1px solid #ccc; background: white; }
+            .card-glass h4, .card-glass p { color: black !important; }
+            .slide.team { background: white !important; }
+            .slide.team h1, .slide.team .subtitle-team, .slide.team .footer-team { color: black !important; }
+            .slide.team .team-member { border: 1px solid #ccc; background: white; }
+            .slide.team .team-member .name { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="dots" id="dotsContainer"></div>
+
+<div class="controls">
+    <button class="btn" onclick="prevSlide()" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+    <span class="btn btn-progress" id="slideCounter"><strong id="currentNum">01</strong> / <span id="totalNum">13</span></span>
+    <button class="btn" onclick="nextSlide()" title="Próximo"><i class="fa-solid fa-chevron-right"></i></button>
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia"><i class="fa-solid fa-expand"></i></button>
+</div>
+
+<div class="container" id="slidesContainer">
+
+    <!-- === SLIDE 1: CAPA === -->
+    <div class="slide cover active">
+        <div class="slide-number">
+            <span class="current">01</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <i class="fa-solid fa-paw cover-icon"></i>
+        <h1><span class="yellow">Toque</span> de <span class="yellow">Amor</span></h1>
+        <div class="subtitle">Cuidar é um gesto de amor ❤️</div>
+        <div class="cover-line"></div>
+        <p class="tagline">Saúde · Lembretes · Comunidade · Adoção</p>
+    </div>
+
+    <!-- === SLIDE 2: O QUE É O TOQUE DE AMOR === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">02</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-heart" style="color: var(--amber);"></i> O que é o Toque de Amor?</h2>
+        <p>
+            O <strong style="color: var(--amber);">Toque de Amor</strong> é um <strong>app mobile de gestão de pets</strong> que reúne, num só lugar, a saúde do animal, lembretes, comunidade de tutores e adoção.
+        </p>
+        <div class="highlight">
+            <i class="fa-solid fa-quote-left"></i>
+            <em style="font-weight: 600;">"Cuidar é um gesto de amor"</em>
+        </div>
+        <ul>
+            <li><strong>Carteira de vacinação</strong> — histórico e progresso (ex: 4/5 vacinas em dia) <span class="badge-green">em dia</span></li>
+            <li><strong>Lembretes</strong> — vacinas, consultas, banho e remédio, com calendário <span class="badge-blue">inteligente</span></li>
+            <li><strong>Comunidade</strong> — feed de tutores próximos <span class="badge-coral">conecte-se</span></li>
+            <li><strong>Adoção</strong> — pets para adotar perto de você, com perfil e ONG responsável</li>
+            <li><strong>Perfil</strong> — tema claro/escuro, notificações e estatísticas</li>
+        </ul>
+    </div>
+
+    <!-- === SLIDE 3: ONBOARDING === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">03</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-play"></i> Onboarding em 3 Passos</h2>
+        <p>Uma experiência de entrada acolhedora e guiada:</p>
+        <div class="grid-3">
+            <div class="card-glass">
+                <i class="fa-solid fa-paw icon"></i>
+                <h4>1. Conheça seu pet</h4>
+                <p>Cadastre seu pet com nome, raça, idade e foto</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-heart-pulse icon green"></i>
+                <h4>2. Saúde em dia</h4>
+                <p>Registre vacinas e configure lembretes</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-users icon blue"></i>
+                <h4>3. Conecte-se</h4>
+                <p>Entre na comunidade e descubra dicas</p>
+            </div>
+        </div>
+        <div class="highlight" style="margin-top: 15px;">
+            <i class="fa-solid fa-check-circle"></i> Cadastro guiado do pet + <strong>tema claro/escuro</strong> nativo
+        </div>
+    </div>
+
+    <!-- === SLIDE 4: IDENTIDADE VISUAL === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">04</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-palette"></i> Identidade Visual</h2>
+        <p><strong>Glassmorphism</strong> — vidro fosco translúcido, cantos arredondados e degradês suaves.</p>
+        <div class="grid-3">
+            <div class="card-glass" style="background: var(--amber); color: white; border: none;">
+                <h4 style="color: white;">Âmbar</h4>
+                <p style="color: rgba(255,255,255,0.8);">#F2A900</p>
+            </div>
+            <div class="card-glass" style="background: var(--yellow); color: var(--text-primary); border: none;">
+                <h4>Amarelo</h4>
+                <p style="color: var(--text-secondary);">#FFC91E</p>
+            </div>
+            <div class="card-glass" style="background: var(--yellow-light); color: var(--text-primary); border: none;">
+                <h4>Amarelo Claro</h4>
+                <p style="color: var(--text-secondary);">#FFD23F</p>
+            </div>
+            <div class="card-glass" style="border-left: 4px solid var(--green);">
+                <i class="fa-solid fa-circle-check icon green"></i>
+                <h4>Verde</h4>
+                <p>#2FBF71 · Sucesso</p>
+            </div>
+            <div class="card-glass" style="border-left: 4px solid var(--blue);">
+                <i class="fa-solid fa-circle-info icon blue"></i>
+                <h4>Azul</h4>
+                <p>#5AA9E6 · Informação</p>
+            </div>
+            <div class="card-glass" style="border-left: 4px solid var(--coral);">
+                <i class="fa-solid fa-triangle-exclamation icon coral"></i>
+                <h4>Coral</h4>
+                <p>#FF7B5E · Alerta</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SLIDE 5: TEMAS === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">05</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-circle-half-stroke"></i> Temas Claro & Escuro</h2>
+        <div class="grid-2">
+            <div class="card-glass" style="background: var(--bg-cream); border: 2px solid var(--amber);">
+                <i class="fa-regular fa-sun icon" style="color: var(--amber);"></i>
+                <h4>Tema Claro</h4>
+                <p style="background: var(--bg-cream-dark); padding: 10px; border-radius: 8px; margin-top: 10px; color: var(--text-primary);">
+                    Fundo: <strong>#FFFDF6</strong> · Texto: <strong>#1c1814</strong>
+                </p>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Fundo creme · Texto principal escuro</p>
+            </div>
+            <div class="card-glass" style="background: var(--bg-dark); border: 2px solid var(--amber);">
+                <i class="fa-regular fa-moon icon" style="color: var(--amber);"></i>
+                <h4 style="color: var(--text-light);">Tema Escuro</h4>
+                <p style="background: var(--bg-dark-light); padding: 10px; border-radius: 8px; margin-top: 10px; color: var(--text-light);">
+                    Fundo: <strong>#15120b</strong> · Texto: <strong>#f4eee0</strong>
+                </p>
+                <p style="font-size: 0.85rem; color: var(--text-light-secondary);">Fundo escuro · Texto principal claro</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SLIDE 6: CARTEIRA DE VACINAÇÃO === -->
+    <div class="slide content-with-image">
+        <div class="slide-number">
+            <span class="current">06</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <div class="text-content">
+            <h2><i class="fa-solid fa-syringe"></i> Carteira de Vacinação</h2>
+            <p>
+                <strong>Histórico completo</strong> e progresso visual das vacinas do seu pet.
+            </p>
+            <div class="highlight">
+                <i class="fa-solid fa-check-circle" style="color: var(--green);"></i>
+                <strong>Progresso:</strong> 4/5 vacinas em dia <span class="badge-green">em dia</span>
+            </div>
+            <ul>
+                <li><strong>V10</strong> — Aplicada em 15/01/2025 <span class="badge-green">em dia</span></li>
+                <li><strong>Raiva</strong> — Vence em 30/06/2025 <span class="badge-coral">próximo vencimento</span></li>
+                <li><strong>Giárdia</strong> — Agendada para 20/07/2025 <span class="badge-blue">agendada</span></li>
+            </ul>
+        </div>
+        <div class="image-content">
+            <img src="vacinas-mockup.png" alt="Carteira de Vacinação" onerror="this.src='https://placehold.co/400x700/F2A900/1c1814?text=Vacinas'">
+        </div>
+    </div>
+
+    <!-- === SLIDE 7: LEMBRETES === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">07</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-bell"></i> Lembretes Inteligentes</h2>
+        <p>Nunca mais esqueça uma consulta, vacina ou remédio:</p>
+        <div class="grid-3">
+            <div class="card-glass">
+                <i class="fa-solid fa-syringe icon"></i>
+                <h4>Vacinas</h4>
+                <p>Lembrete automático para cada dose</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-stethoscope icon blue"></i>
+                <h4>Consultas</h4>
+                <p>Agende e receba alertas</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-prescription-bottle icon green"></i>
+                <h4>Remédios</h4>
+                <p>Controle de medicação</p>
+            </div>
+        </div>
+        <div class="highlight">
+            <i class="fa-solid fa-calendar-check"></i> Calendário integrado com <strong>visão mês</strong> e <strong>visão lista</strong>
+        </div>
+    </div>
+
+    <!-- === SLIDE 8: COMUNIDADE === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">08</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-users"></i> Comunidade</h2>
+        <p>Conecte-se com tutores próximos e compartilhe experiências:</p>
+        <div class="grid-3">
+            <div class="card-glass">
+                <i class="fa-solid fa-newspaper icon"></i>
+                <h4>Feed</h4>
+                <p>Posts com fotos, vídeos e texto</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-layer-group icon blue"></i>
+                <h4>Grupos</h4>
+                <p>"Tutores de Golden", "Gatos e Adoção" e mais</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-comments icon coral"></i>
+                <h4>Perguntas & Respostas</h4>
+                <p>Fórum colaborativo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SLIDE 9: ADOÇÃO === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">09</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-hand-holding-heart" style="color: var(--coral);"></i> Adoção</h2>
+        <p>Encontre pets disponíveis para adoção perto de você:</p>
+        <div class="grid-2">
+            <div class="card-glass">
+                <i class="fa-solid fa-magnifying-glass icon"></i>
+                <h4>Busca Inteligente</h4>
+                <p>Filtros por espécie, porte, localização e idade</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-building icon blue"></i>
+                <h4>ONGs Parceiras</h4>
+                <p>Perfil completo com animais disponíveis</p>
+            </div>
+        </div>
+        <div class="highlight" style="border-left-color: var(--coral);">
+            <i class="fa-solid fa-heart" style="color: var(--coral);"></i>
+            <strong>Fluxo de adoção:</strong> Solicitação → Notificação para ONG → Contato para entrevista
+        </div>
+    </div>
+
+    <!-- === SLIDE 10: PERFIL DO USUÁRIO === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">10</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-user"></i> Perfil do Usuário</h2>
+        <p>Gerencie suas informações e preferências:</p>
+        <div class="grid-3">
+            <div class="card-glass">
+                <i class="fa-solid fa-id-card icon"></i>
+                <h4>Informações Pessoais</h4>
+                <p>Foto, nome, e-mail e estatísticas</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-sliders icon blue"></i>
+                <h4>Preferências</h4>
+                <p>Notificações, idioma, <strong>tema claro/escuro</strong></p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-circle-question icon coral"></i>
+                <h4>Ajuda & Suporte</h4>
+                <p>FAQ, contato, termos de uso</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SLIDE 11: TECNOLOGIAS === -->
+    <div class="slide content">
+        <div class="slide-number">
+            <span class="current">11</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <h2><i class="fa-solid fa-cubes"></i> Stack Tecnológica</h2>
+        <div class="grid-3">
+            <div class="card-glass">
+                <i class="fa-brands fa-react icon"></i>
+                <h4>React Native / Flutter</h4>
+                <p>Multiplataforma com performance nativa</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-database icon blue"></i>
+                <h4>SQLite + Firebase</h4>
+                <p>Offline-first com sincronização em nuvem</p>
+            </div>
+            <div class="card-glass">
+                <i class="fa-solid fa-cloud icon green"></i>
+                <h4>Next.js API</h4>
+                <p>Backend RESTful escalável</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SLIDE 12: CONCLUSÃO === -->
+    <div class="slide section">
+        <div class="slide-number">
+            <span class="current">12</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <i class="fa-solid fa-paw icon"></i>
+        <h1>Toque de Amor</h1>
+        <p style="font-size: 1.5rem; font-weight: 800; opacity: 1;">Cuidar é um gesto de amor ❤️</p>
+        <br>
+        <a href="#" class="cta-btn" onclick="alert('🐾❤️ Em breve na Play Store!')">
+            <i class="fa-solid fa-rocket"></i> Conheça o App
+        </a>
+        <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.6;">
+            Saúde · Lembretes · Comunidade · Adoção
+        </p>
+    </div>
+
+    <!-- === SLIDE 13: EQUIPE === -->
+    <div class="slide team">
+        <div class="slide-number">
+            <span class="current">13</span>
+            <span class="separator">/</span>
+            <span class="total">13</span>
+        </div>
+        <i class="fa-solid fa-paw" style="font-size: 4rem; color: var(--amber); margin-bottom: 20px;"></i>
+        <h1>Equipe Toque de Amor</h1>
+        <p class="subtitle-team">Cuidar é um gesto de amor — e essa equipe faz isso acontecer ❤️</p>
+        <div class="team-grid">
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Vitor Moreira</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Richard Hupel</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Sara</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Natália</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Azumi</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Rakelly</span>
+            </div>
+            <div class="team-member">
+                <i class="fa-solid fa-user"></i>
+                <span class="name">Yuri</span>
+            </div>
+        </div>
+        <div class="team-line"></div>
+        <p class="footer-team">Toque de Amor · 2026 · COTIL/UNICAMP</p>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+    const dotsContainer = document.getElementById('dotsContainer');
+    const currentNum = document.getElementById('currentNum');
+    const totalNum = document.getElementById('totalNum');
+
+    totalNum.textContent = String(totalSlides).padStart(2, '0');
+
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.setAttribute('data-index', i);
+        dot.addEventListener('click', () => showSlide(i));
+        dotsContainer.appendChild(dot);
+    }
+    const dots = document.querySelectorAll('.dot');
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        dots.forEach((dot, i) => {
+            dot.classList.remove('active');
+            if (i === currentSlide) dot.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+        currentNum.textContent = String(currentSlide + 1).padStart(2, '0');
+    }
+
+    function toggleFullscreen() {
+        const el = document.documentElement;
+        if (!document.fullscreenElement) {
+            el.requestFullscreen().catch(err => {
+                console.log('Erro ao entrar em tela cheia:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key === 'f' || e.key === 'F11') {
+            e.preventDefault();
+            toggleFullscreen();
+        }
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>
